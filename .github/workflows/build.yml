@@ -41,7 +41,7 @@ jobs:
       - name: Link ANGLE
         working-directory: ${{github.workspace}}
         shell: cmd
-        run: lib /out:libangle.lib angle-x86-windows-static/installed/x86-windows-static/lib/ANGLE.lib angle-x86-windows-static/installed/x86-windows-static/lib/libEGL.lib angle-x86-windows-static/installed/x86-windows-static/lib/libGLESv2.lib
+        run: lib /out:libangle.lib angle-x86-windows-static/installed/x86-windows-static/lib/*.lib
 
       - name: Link av_libglesv2.lib
         working-directory: ${{github.workspace}}
