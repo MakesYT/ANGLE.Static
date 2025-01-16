@@ -26,7 +26,7 @@ jobs:
       - name: Link Windows SDK
         working-directory: ${{github.workspace}}
         shell: pwsh
-        run: lib /out:winstatic.lib $env:WindowsSdkDir\Lib\$env:WindowsSDKVersion\um\x86\User32.Lib $env:WindowsSdkDir\Lib\$env:WindowsSDKVersion\um\x86\Gdi32.Lib
+        run: lib /out:winstatic.lib $env:WindowsSdkDir\Lib\$env:WindowsSDKVersion\um\x86\User32.Lib $env:WindowsSdkDir\Lib\$env:WindowsSDKVersion\um\x86\Gdi32.Lib $env:WindowsSdkDir\Lib\$env:WindowsSDKVersion\um\x86\kernel32.Lib
 
       - name: Build ANGLE
         working-directory: ${{github.workspace}}
