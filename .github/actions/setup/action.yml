@@ -7,10 +7,87 @@ runs:
     - uses: TheMrMilchmann/setup-msvc-dev@v3
       with:
         arch: x64
-    - name: Install Windows SDK Debugging Tools
+    - name: Install Windows SDK Debugging Tools via VS Installer
       shell: pwsh
       run: |
-        choco install windows-sdk-debuggers -y
+        # Find the path to vswhere.exe, which helps locate Visual Studio installations.
+        $vswherePath = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+        if (-not (Test-Path $vswherePath)) {
+            Write-Error "vswhere.exe not found at $vswherePath. Ensure Visual Studio Installer is present."
+            exit 1
+        }
+        
+        # Find the path to the latest Visual Studio Enterprise installation
+        # Adjust 'Enterprise' if you're using 'Professional' or 'Community'
+        $vsInstallPath = & "$vswherePath" -latest -products Microsoft.VisualStudio.Product.Enterprise -property installationPath | Select-Object -First 1
+        
+        if ([string]::IsNullOrWhiteSpace($vsInstallPath)) {
+            Write-Error "Could not find a Visual Studio installation using vswhere.exe."
+            exit 1
+        }
+        
+        # Construct the path to the Visual Studio Installer executable
+        $vsInstallerPath = Join-Path $vsInstallPath "Common7\IDE\Installer\vs_installer.exe"
+        if (-not (Test-Path $vsInstallerPath)) {
+            # Older versions might have it directly in the installer directory
+            $vsInstallerPath = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vs_installer.exe"
+            if (-not (Test-Path $vsInstallerPath)) {
+                Write-Error "vs_installer.exe not found at $vsInstallerPath."
+                exit 1
+            }
+        }
+        
+        Write-Host "Found Visual Studio Installer at: $vsInstallerPath"
+        
+        # The component ID for "Debugging Tools for Windows" is 'Microsoft.VisualStudio.Component.Windows10SDK.19041.Debuggers'
+        # or similar, where 19041 refers to a specific SDK version.
+        # For SDK 10.0.26100.0, the component ID might be like 'Microsoft.VisualStudio.Component.Windows10SDK.26100.Debuggers'
+        # However, the most robust way is to install the full SDK component that includes debuggers.
+        # The 'Microsoft.VisualStudio.Component.Windows10SDK' component generally includes debuggers.
+        # If not, you'd target 'Microsoft.VisualStudio.Component.DebuggingTools.Windows'.
+        
+        # Let's try adding the core Windows 10 SDK component (which should include debuggers)
+        # If it's already installed, it will simply verify.
+        # If the specific debuggers component is missing, it will add it.
+        # Component IDs can vary slightly, so checking an existing VS installation on a dev machine is ideal.
+        # Common component IDs related to SDK and debuggers:
+        # - Microsoft.VisualStudio.Component.Windows10SDK.19041 (replace 19041 with your SDK version e.g. 26100)
+        # - Microsoft.VisualStudio.Component.Windows10SDK.18362 (older example)
+        # - Microsoft.VisualStudio.Component.DebuggingTools.Windows (more generic debugging tools)
+        
+        # Let's use the most general approach for the SDK that includes debuggers
+        # The specific SDK version like 10.0.26100.0 corresponds to an internal VS component ID.
+        # A safer bet is to use the component for the SDK that contains it.
+        # You can find exact component IDs by running `vs_installer.exe --layout <some_dir> --includeRecommended --includeOptional`
+        # and looking at the generated JSON, or by using `vswhere -products * -format json -requires Microsoft.VisualStudio.Component.Windows10SDK.26100`
+        
+        # Given your UCRTVersion is 10.0.26100.0, the component ID is likely:
+        $sdkComponentId = "Microsoft.VisualStudio.Component.Windows10SDK.26100"
+        $debuggerComponentId = "Microsoft.VisualStudio.Component.DebuggingTools.Windows" # This often pulls in latest SDK debuggers
+        
+        # Option 1: Try to add the specific SDK component (preferred if it exists)
+        Write-Host "Attempting to add SDK component: $sdkComponentId"
+        Start-Process -FilePath $vsInstallerPath -ArgumentList "modify --installPath `"$vsInstallPath`" --add $sdkComponentId --quiet --wait" -Wait -NoNewWindow -ErrorAction SilentlyContinue
+        
+        # Option 2: Also try adding the general Windows Debugging Tools component if Option 1 didn't work or is insufficient
+        Write-Host "Attempting to add Debugging Tools component: $debuggerComponentId"
+        Start-Process -FilePath $vsInstallerPath -ArgumentList "modify --installPath `"$vsInstallPath`" --add $debuggerComponentId --quiet --wait" -Wait -NoNewWindow -ErrorAction SilentlyContinue
+        
+        # Validate if the dbghelp.dll exists now (optional, but good for debugging)
+        $expectedDbghelpPath = "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\dbghelp.dll" # or x86 if you're building x86
+        if (-not (Test-Path $expectedDbghelpPath)) {
+            Write-Warning "dbghelp.dll not found after installation attempt at $expectedDbghelpPath."
+            # If your build is x86, it might be in C:\Program Files (x86)\Windows Kits\10\Debuggers\x86\dbghelp.dll
+            $expectedDbghelpPathX86 = "C:\Program Files (x86)\Windows Kits\10\Debuggers\x86\dbghelp.dll"
+            if (-not (Test-Path $expectedDbghelpPathX86)) {
+                 Write-Error "dbghelp.dll missing for both x64 and x86 after installation attempt. Build will likely fail."
+                 exit 1
+            } else {
+                 Write-Host "dbghelp.dll found for x86: $expectedDbghelpPathX86"
+            }
+        } else {
+            Write-Host "dbghelp.dll found for x64: $expectedDbghelpPath"
+        }
     - name: Install uv
       uses: astral-sh/setup-uv@v6
 
