@@ -4,10 +4,10 @@ description: Setup build action
 runs:
   using: "composite"
   steps:
-    - uses: TheMrMilchmann/setup-msvc-dev@v3
-      with:
-        arch: x86
-        sdk: 10.0.26100.0
+#    - uses: TheMrMilchmann/setup-msvc-dev@v3
+#      with:
+#        arch: x86
+#        sdk: 10.0.26100.0
     - name: Download Visual Studio Installer
       run: |
         Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/f55fba7b-3f02-49b7-9aca-a075049a807d/156d03c3d97ceb7b5e07f86ae34389af7ee7470fb68059a4a0a0d1ac3bce35b7/vs_BuildTools.exe" -OutFile vs_buildtools.exe
