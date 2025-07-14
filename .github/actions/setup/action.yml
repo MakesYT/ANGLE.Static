@@ -17,5 +17,5 @@ runs:
     - name: Setup PATH and ENV
       shell: pwsh
       run: |
-        echo "ANGLEStaticName=angle-x64-windows-static-chromium-$env:ANGLE_Branch-$env:UCRTVersion" >> $env:GITHUB_ENV
+        echo "ANGLEStaticName=angle-x86-windows-static-chromium-$env:ANGLE_Branch-$env:UCRTVersion" >> $env:GITHUB_ENV
         echo "BuildDir=$env:GITHUB_WORKSPACE/out/windows/x64" >> $env:GITHUB_ENV

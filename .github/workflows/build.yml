@@ -78,7 +78,7 @@ jobs:
         working-directory: angle
         shell: pwsh
         run: |
-          gn gen $env:BuildDir
+          gn gen $env:BuildDir --args='target_cpu="x86"'
           autoninja -C $env:BuildDir libANGLE_static libGLESv2_static
 
       - name: Package ANGLE
