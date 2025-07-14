@@ -19,6 +19,6 @@ build_angle_deqp_tests = false
 
 angle_enable_swiftshader = false
 angle_enable_wgpu = false
-angle_enable_vulkan = false
+angle_enable_vulkan = true
 
 windows_sdk_version = "10.0.26100.0"
