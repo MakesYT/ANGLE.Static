@@ -10,7 +10,7 @@ runs:
         sdk: 10.0.26100.0
     - name: Download Visual Studio Installer
       run: |
-        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile vs_buildtools.exe
+        Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/f55fba7b-3f02-49b7-9aca-a075049a807d/156d03c3d97ceb7b5e07f86ae34389af7ee7470fb68059a4a0a0d1ac3bce35b7/vs_BuildTools.exe" -OutFile vs_buildtools.exe
       shell: powershell
 
     - name: Install Windows SDK 10.0.26100
@@ -21,6 +21,19 @@ runs:
         # --norestart prevents a system restart after installation.
         .\vs_buildtools.exe --quiet --wait --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --passive --norestart
       shell: powershell
+    - name: Verify SDK Installation (Optional)
+      run: |
+        # This step is optional but highly recommended to confirm the SDK is present.
+        # It looks for the SDK directory.
+        $sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0"
+        if (Test-Path $sdkPath) {
+            Write-Host "Windows SDK 10.0.26100 found at $sdkPath"
+        } else {
+            Write-Error "Windows SDK 10.0.26100 not found at $sdkPath"
+            exit 1
+        }
+      shell: powershell
+
     - name: Install uv
       uses: astral-sh/setup-uv@v6
 
