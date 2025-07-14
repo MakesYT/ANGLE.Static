@@ -10,7 +10,7 @@ runs:
     - name: Install Windows SDK Debugging Tools
       shell: pwsh
       run: |
-        choco install windows-sdk-debuggers --version 10.0.26100.0 -y
+        choco install windows-sdk-debuggers -y
     - name: Install uv
       uses: astral-sh/setup-uv@v6
 
