@@ -8,6 +8,19 @@ runs:
       with:
         arch: x86
         sdk: 10.0.26100.0
+    - name: Download Visual Studio Installer
+      run: |
+        Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile vs_buildtools.exe
+      shell: powershell
+
+    - name: Install Windows SDK 10.0.26100
+      run: |
+        # The component ID for Windows 11 SDK (10.0.26100.0) is "Microsoft.VisualStudio.Component.Windows11SDK.26100"
+        # We use --add to ensure the component is added.
+        # --passive makes the installation process silent.
+        # --norestart prevents a system restart after installation.
+        .\vs_buildtools.exe --quiet --wait --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --passive --norestart
+      shell: powershell
     - name: Install uv
       uses: astral-sh/setup-uv@v6
 
