@@ -20,6 +20,7 @@ runs:
         # --passive makes the installation process silent.
         # --norestart prevents a system restart after installation.
         .\vs_buildtools.exe --quiet --wait --add Microsoft.VisualStudio.Component.Windows11SDK.26100 --passive --norestart
+        .\vs_buildtools.exe --quiet --wait --add Microsoft.VisualStudio.Component.DebuggingTools.Windows --passive --norestart
       shell: powershell
     - name: Verify SDK Installation (Optional)
       run: |
